@@ -1,0 +1,66 @@
+description: CloudSleuth automated failover — start secondary, verify health, shift traffic
+schemaVersion: '0.3'
+assumeRole: '${ssm_role_arn}'
+parameters:
+  Reason:
+    type: String
+    default: 'Anomaly detector triggered failover'
+    description: Why this failover was initiated
+mainSteps:
+  - name: StartSecondaryInstance
+    action: aws:executeAwsApi
+    inputs:
+      Service: ec2
+      Api: StartInstances
+      InstanceIds:
+        - '${secondary_instance_id}'
+
+  - name: WaitForInstanceRunning
+    action: aws:waitForAwsResourceProperty
+    timeoutSeconds: 300
+    inputs:
+      Service: ec2
+      Api: DescribeInstanceStatus
+      InstanceIds:
+        - '${secondary_instance_id}'
+      PropertySelector: '$.InstanceStatuses[0].InstanceState.Name'
+      DesiredValues:
+        - running
+
+  - name: WaitForStatusChecks
+    action: aws:waitForAwsResourceProperty
+    timeoutSeconds: 180
+    inputs:
+      Service: ec2
+      Api: DescribeInstanceStatus
+      InstanceIds:
+        - '${secondary_instance_id}'
+      PropertySelector: '$.InstanceStatuses[0].InstanceStatus.Status'
+      DesiredValues:
+        - ok
+
+  - name: PromoteSecondary
+    action: aws:executeAwsApi
+    inputs:
+      Service: globalaccelerator
+      Api: UpdateEndpointGroup
+      EndpointGroupArn: '${secondary_endpoint_group_arn}'
+      TrafficDialPercentage: 100
+
+  # promote secondary BEFORE draining primary — overlap is safe, gap is not
+  - name: DrainPrimary
+    action: aws:executeAwsApi
+    inputs:
+      Service: globalaccelerator
+      Api: UpdateEndpointGroup
+      EndpointGroupArn: '${primary_endpoint_group_arn}'
+      TrafficDialPercentage: 0
+
+  - name: NotifyTeam
+    action: aws:executeAwsApi
+    inputs:
+      Service: sns
+      Api: Publish
+      TopicArn: '${sns_topic_arn}'
+      Subject: '[CloudSleuth] Failover complete'
+      Message: 'Automated failover executed. Traffic shifted to secondary region (${secondary_region}). Reason: {{ Reason }}'

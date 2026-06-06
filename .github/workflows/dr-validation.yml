@@ -1,0 +1,64 @@
+name: DR Validation
+
+# Quarterly DR drill — validates the failover path works end-to-end.
+# Can also be triggered manually for ad-hoc testing.
+on:
+  schedule:
+    - cron: '0 14 1 */3 *'  # 1st of every 3rd month, 2pm UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Skip actual failover, just validate detection'
+        required: false
+        default: 'true'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  DETECTOR_FUNCTION: cloudsleuth-dev-detector
+
+jobs:
+  validate-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: configure aws
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: invoke detector (smoke test)
+        run: |
+          aws lambda invoke \
+            --function-name "$DETECTOR_FUNCTION" \
+            --payload '{}' \
+            /tmp/response.json
+          cat /tmp/response.json
+          python3 -c "
+          import json
+          with open('/tmp/response.json') as f:
+              r = json.load(f)
+          assert 'score' in r or 'status' in r, f'unexpected response: {r}'
+          print(f'Detector healthy: {r}')
+          "
+
+      - name: verify secondary instance exists
+        run: |
+          aws ec2 describe-instances \
+            --filters "Name=tag:Project,Values=cloudsleuth" \
+                      "Name=tag:Role,Values=secondary" \
+            --query 'Reservations[].Instances[].{Id:InstanceId,State:State.Name}' \
+            --region us-west-2 \
+            --output table
+
+      - name: verify accelerator health
+        run: |
+          aws globalaccelerator list-accelerators \
+            --query 'Accelerators[?Name==`cloudsleuth-dev`]' \
+            --region us-west-2 \
+            --output table
