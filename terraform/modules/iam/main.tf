@@ -4,17 +4,11 @@ variable "github_repo" {}
 
 # --- GitHub OIDC for CI ---
 
-data "aws_iam_openid_connect_provider" "github" {
-  # assumes OIDC provider already exists from another project (CloudPipe)
-  # if not, uncomment the resource below
-  url = "https://token.actions.githubusercontent.com"
+resource "aws_iam_openid_connect_provider" "github" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["ffffffffffffffffffffffffffffffffffffffff"]
 }
-
-# resource "aws_iam_openid_connect_provider" "github" {
-#   url             = "https://token.actions.githubusercontent.com"
-#   client_id_list  = ["sts.amazonaws.com"]
-#   thumbprint_list = ["ffffffffffffffffffffffffffffffffffffffff"]
-# }
 
 resource "aws_iam_role" "ci" {
   name = "cloudsleuth-${var.environment}-ci"
@@ -23,7 +17,7 @@ resource "aws_iam_role" "ci" {
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
-      Principal = { Federated = data.aws_iam_openid_connect_provider.github.arn }
+      Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {

@@ -30,8 +30,9 @@ resource "aws_globalaccelerator_endpoint_group" "primary" {
   traffic_dial_percentage = 100
 
   endpoint_configuration {
-    endpoint_id = var.primary_instance_id
-    weight      = 100
+    endpoint_id                    = var.primary_instance_id
+    weight                         = 100
+    client_ip_preservation_enabled = true
   }
 
   health_check_port             = var.app_port
@@ -50,12 +51,13 @@ resource "aws_globalaccelerator_endpoint_group" "secondary" {
   listener_arn          = aws_globalaccelerator_listener.http.id
   endpoint_group_region = var.secondary_region
 
-  # starts at 0 — pilot light is dark until failover activates it
+  # starts at 0--pilot light is dark until failover activates it
   traffic_dial_percentage = 0
 
   endpoint_configuration {
-    endpoint_id = var.secondary_instance_id
-    weight      = 100
+    endpoint_id                    = var.secondary_instance_id
+    weight                         = 100
+    client_ip_preservation_enabled = true
   }
 
   health_check_port             = var.app_port
