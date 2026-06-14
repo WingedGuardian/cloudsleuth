@@ -59,7 +59,6 @@ module "primary_compute" {
 
   environment   = var.environment
   vpc_id        = module.primary_network.vpc_id
-  vpc_cidr      = "10.0.0.0/16"
   subnet_id     = module.primary_network.public_subnet_id
   instance_type = var.instance_type
   desired_state = "running"
@@ -83,7 +82,6 @@ module "secondary_compute" {
 
   environment   = var.environment
   vpc_id        = module.secondary_network.vpc_id
-  vpc_cidr      = "10.1.0.0/16"
   subnet_id     = module.secondary_network.public_subnet_id
   instance_type = var.instance_type
   desired_state = "stopped"

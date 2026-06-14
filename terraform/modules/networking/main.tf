@@ -1,12 +1,22 @@
 terraform {
+  required_version = ">= 1.5"
   required_providers {
-    aws = { source = "hashicorp/aws" }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 }
 
-variable "environment" {}
-variable "vpc_cidr" {}
-variable "region_tag" {}
+variable "environment" {
+  type = string
+}
+variable "vpc_cidr" {
+  type = string
+}
+variable "region_tag" {
+  type = string
+}
 
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr

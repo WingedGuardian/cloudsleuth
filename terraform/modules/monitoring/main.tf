@@ -1,13 +1,33 @@
-variable "environment" {}
-variable "primary_instance_id" {}
-variable "primary_public_ip" {}
-variable "primary_region" {}
-variable "secondary_instance_id" {}
-variable "secondary_region" {}
-variable "ssm_role_arn" {}
-variable "primary_endpoint_group_arn" {}
-variable "secondary_endpoint_group_arn" {}
-variable "app_port" {}
+variable "environment" {
+  type = string
+}
+variable "primary_instance_id" {
+  type = string
+}
+variable "primary_public_ip" {
+  type = string
+}
+variable "primary_region" {
+  type = string
+}
+variable "secondary_instance_id" {
+  type = string
+}
+variable "secondary_region" {
+  type = string
+}
+variable "ssm_role_arn" {
+  type = string
+}
+variable "primary_endpoint_group_arn" {
+  type = string
+}
+variable "secondary_endpoint_group_arn" {
+  type = string
+}
+variable "app_port" {
+  type = number
+}
 
 # --- State table (anomaly detector persists baselines here) ---
 

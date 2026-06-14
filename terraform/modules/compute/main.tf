@@ -1,16 +1,31 @@
 terraform {
+  required_version = ">= 1.5"
   required_providers {
-    aws = { source = "hashicorp/aws" }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 }
 
-variable "environment" {}
-variable "vpc_id" {}
-variable "vpc_cidr" {}
-variable "subnet_id" {}
-variable "instance_type" {}
-variable "desired_state" {}
-variable "app_port" {}
+variable "environment" {
+  type = string
+}
+variable "vpc_id" {
+  type = string
+}
+variable "subnet_id" {
+  type = string
+}
+variable "instance_type" {
+  type = string
+}
+variable "desired_state" {
+  type = string
+}
+variable "app_port" {
+  type = number
+}
 
 data "aws_ami" "al2023" {
   most_recent = true
@@ -34,7 +49,7 @@ resource "aws_security_group" "app" {
     from_port   = var.app_port
     to_port     = var.app_port
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # GA with client_ip_preservation passes real client IPs
+    cidr_blocks = ["0.0.0.0/0"] # GA with client_ip_preservation passes real client IPs
   }
 
   # SSM agent needs outbound HTTPS

@@ -1,6 +1,12 @@
-variable "environment" {}
-variable "github_org" {}
-variable "github_repo" {}
+variable "environment" {
+  type = string
+}
+variable "github_org" {
+  type = string
+}
+variable "github_repo" {
+  type = string
+}
 
 # --- GitHub OIDC for CI ---
 

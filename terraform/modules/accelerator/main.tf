@@ -1,9 +1,21 @@
-variable "environment" {}
-variable "primary_instance_id" {}
-variable "primary_region" {}
-variable "secondary_instance_id" {}
-variable "secondary_region" {}
-variable "app_port" {}
+variable "environment" {
+  type = string
+}
+variable "primary_instance_id" {
+  type = string
+}
+variable "primary_region" {
+  type = string
+}
+variable "secondary_instance_id" {
+  type = string
+}
+variable "secondary_region" {
+  type = string
+}
+variable "app_port" {
+  type = number
+}
 
 resource "aws_globalaccelerator_accelerator" "this" {
   name            = "cloudsleuth-${var.environment}"
