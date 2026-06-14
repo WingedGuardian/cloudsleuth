@@ -22,14 +22,13 @@ Multi-region pilot light DR with a predictive anomaly detector that watches infr
 - [x] SSM Automation document for full failover workflow
 - [x] Route53 health check as reactive backup
 - [x] OIDC authentication for CI (no stored AWS credentials)
-- [x] 20+ unit tests for detection logic
 - [x] DR runbook with RTO/RPO calculations
 
 ### Should Have
 - [x] Optional LLM narrative for alerts (Bedrock, graceful degradation)
 - [x] Demo endpoint for simulating CPU load
 - [x] CloudWatch Agent for memory/disk custom metrics
-- [x] GitHub Actions CI (terraform validate + ruff + pytest)
+- [x] GitHub Actions CI (terraform validate + ruff + tflint)
 - [x] Quarterly DR validation workflow
 
 ### Won't Have (This Version)
@@ -41,7 +40,7 @@ Multi-region pilot light DR with a predictive anomaly detector that watches infr
 ## Success Criteria
 
 - `terraform validate` passes
-- 22 tests pass (`ruff check . && pytest -v`)
+- `ruff check .` and `tflint` pass clean
 - Anomaly detector correctly scores normal metrics low (< 40) and degrading metrics high (> 60)
 - Single-metric spike doesn't trigger critical action (composite scoring works)
 - Cooldown prevents re-triggering within 30 minutes

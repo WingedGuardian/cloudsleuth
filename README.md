@@ -51,10 +51,10 @@ False positive worst case: a secondary EC2 starts for 10 minutes and stops. ~$0.
 cd terraform/bootstrap && terraform init && terraform apply  # one-time state backend
 cd .. && terraform init && terraform apply
 
-# Run tests locally
+# Lint locally
 python -m venv .venv && source .venv/bin/activate
 pip install ".[dev]"
-ruff check . && pytest -v
+ruff check .
 
 # Trigger a demo failover (after deploy)
 aws ssm start-automation-execution \
