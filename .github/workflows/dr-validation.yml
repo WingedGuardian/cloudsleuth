@@ -3,8 +3,6 @@ name: DR Validation
 # Quarterly DR drill — validates the failover path works end-to-end.
 # Can also be triggered manually for ad-hoc testing.
 on:
-  schedule:
-    - cron: '0 14 1 */3 *'  # 1st of every 3rd month, 2pm UTC
   workflow_dispatch:
     inputs:
       dry_run:

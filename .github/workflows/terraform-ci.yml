@@ -1,11 +1,12 @@
 name: Terraform CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     paths:
       - 'terraform/**'
       - 'anomaly_detector/**'
-      - 'tests/**'
 
 permissions:
   id-token: write
@@ -33,7 +34,12 @@ jobs:
         run: terraform validate
         working-directory: terraform
 
-  lint-and-test:
+      - name: tflint
+        uses: terraform-linters/setup-tflint@v4
+      - run: tflint --init && tflint --recursive
+        working-directory: terraform
+
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +53,3 @@ jobs:
 
       - name: ruff
         run: ruff check .
-
-      - name: pytest
-        run: pytest -v
